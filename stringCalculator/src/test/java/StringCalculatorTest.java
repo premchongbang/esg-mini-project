@@ -32,7 +32,8 @@ public class StringCalculatorTest {
     public void stringCalculatorTestWithNewLineBetweenString() {
         assertEquals(6, sc.Add("1\n2,3"));
 
-        assertEquals(0, sc.Add("1,2,3,\n"));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> sc.Add("1,2,3,\n"));
+        assertTrue(e.getMessage().equals("Invalid input."));
     }
 
     @Test
@@ -62,6 +63,7 @@ public class StringCalculatorTest {
     @Test
     public void stringCalculatorTestWithMultipleDelimiters() {
         assertEquals(6, sc.Add("//[|][%]\n1|2%3"));
+        assertEquals(6, sc.Add("//[-][+]\n1-2+3"));
     }
 
     @Test

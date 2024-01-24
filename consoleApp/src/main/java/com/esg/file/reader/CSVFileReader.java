@@ -10,12 +10,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Component
+@Component("csvFileReader")
 public class CSVFileReader implements CustomerFileReader{
 
     public List<CustomerDetail> parseFileContent(String csvFilePath) {

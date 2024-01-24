@@ -1,5 +1,3 @@
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -8,7 +6,8 @@ public class StringCalculator {
 
     public int Add(String number) throws IllegalArgumentException {
         String[] delimiterArr = new String[0];
-        if (StringUtils.isEmpty(number) || number.equals("0")) {
+
+        if (number.isEmpty()) {
             return 0;
         } else if (number.startsWith("//[")) {
             int delimiterEndIndex = number.indexOf("]\n");
@@ -23,8 +22,8 @@ public class StringCalculator {
             delimiterArr = new String[]{number.substring(2, delimiterEndIndex)};
             number = number.substring(delimiterEndIndex + 1);
         } else if (number.contains("\n")) {
-            if (number.indexOf("\n") == (number.length()-1)) {
-               return 0;
+            if (number.endsWith("\n")) {
+                throw new IllegalArgumentException("Invalid input.");
             }
             number = number.replace("\n", ",");
         }

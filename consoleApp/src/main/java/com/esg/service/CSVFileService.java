@@ -2,7 +2,7 @@ package com.esg.service;
 
 
 import com.esg.feign.CustomerFeignClient;
-import com.esg.file.reader.CSVFileReader;
+import com.esg.file.reader.CustomerFileReader;
 import com.esg.model.CustomerDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,10 @@ public class CSVFileService {
     private  CustomerFeignClient customerFeignClient;
 
     @Autowired
-    private CSVFileReader csvFileReader;
+    private CustomerFileReader customerFileReader;
 
     public List<CustomerDetail> parseCSVFileContent(String filePath) {
-        return csvFileReader.parseFileContent(filePath);
+        return customerFileReader.parseFileContent(filePath);
     }
 
     public Iterable<CustomerDetail> saveFileContent(List<CustomerDetail> customerDetailsList) {
