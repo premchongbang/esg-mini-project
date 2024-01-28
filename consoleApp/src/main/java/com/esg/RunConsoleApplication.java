@@ -48,7 +48,7 @@ public class RunConsoleApplication {
                         System.out.println("File content is empty or invalid.");
                     }
                     System.out.println("Provide file path:");
-                } catch (InternalException e) {
+                } catch (Exception e) {
                     System.out.printf("%s.\nPlease provide correct file path:\n", e.getMessage());
                 }
             }
