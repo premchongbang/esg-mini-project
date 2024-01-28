@@ -2,14 +2,17 @@ package com.esg.controller;
 
 import com.esg.exception.CustomerNotFoundException;
 import com.esg.model.CustomerDetail;
+import com.esg.security.SecurityConfig;
 import com.esg.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -25,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(CustomerApiController.class)
 @AutoConfigureMockMvc
+@Import({SecurityConfig.class})
 public class CustomerApiControllerTest {
 
     @Autowired
@@ -34,6 +39,12 @@ public class CustomerApiControllerTest {
     CustomerService customerService;
 
     List<CustomerDetail> testData = new ArrayList<>();
+
+    @Value("${esg.basic.auth.username}")
+    private String username;
+
+    @Value("${esg.basic.auth.password}")
+    private String password;
 
     @BeforeEach
     void setUp() {
@@ -80,6 +91,7 @@ public class CustomerApiControllerTest {
 
         String jsonContent = new ObjectMapper().writeValueAsString(testData);
         mockMvc.perform(post("/api/customer")
+                            .with(httpBasic(username, password))
                 .content(jsonContent)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -89,6 +101,7 @@ public class CustomerApiControllerTest {
     @Test
     public void postMappingSaveCustomerListTestWithEmptyInput() throws Exception {
         mockMvc.perform(post("/api/customer")
+                            .with(httpBasic(username, password))
                         .content("")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -113,7 +126,7 @@ public class CustomerApiControllerTest {
                 """;
         when(customerService.getCustomersByRef("XSF1DF")).thenReturn(Optional.of(new CustomerDetail(1,"XSF1DF","John","15 Norwood","West","Reading","Hampshire","UK","RG12GH")));
         mockMvc.perform(get("/api/customer/XSF1DF")
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON).with(httpBasic(username, password)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResponse, false));
     }
@@ -122,7 +135,16 @@ public class CustomerApiControllerTest {
     public void getMappingGetCustomersByRefTestWithInvalidRef() throws Exception {
         when(customerService.getCustomersByRef("XSF1D")).thenThrow(CustomerNotFoundException.class);
         mockMvc.perform(get("/api/customer/XSF1D")
+                            .with(httpBasic(username, password))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getMappingGetCustomersByRefTestWithoutAuthentication() throws Exception {
+        when(customerService.getCustomersByRef("XSF1D")).thenThrow(CustomerNotFoundException.class);
+        mockMvc.perform(get("/api/customer/XSF1D")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
     }
 }

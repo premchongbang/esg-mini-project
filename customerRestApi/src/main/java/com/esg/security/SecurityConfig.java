@@ -1,5 +1,6 @@
 package com.esg.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -16,9 +17,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Value("${esg.basic.auth.username}")
+    private String username;
+
+    @Value("${esg.basic.auth.password}")
+    private String password;
+
     @Bean
     public InMemoryUserDetailsManager user() {
-        return new InMemoryUserDetailsManager(User.withUsername("esg-default-username").password("{noop}esg-default-password").authorities("read").build());
+        return new InMemoryUserDetailsManager(User.withUsername(username).password("{noop}"+password).authorities("read").build());
     }
 
     @Bean
